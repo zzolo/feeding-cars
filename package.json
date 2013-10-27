@@ -1,0 +1,23 @@
+{
+  "name": "feeding-cars",
+  "version": "0.0.1",
+  "description": "A simple site providing feeds into the happenings of data journalism.",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zzolo/feeding-cars.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zzolo/feeding-cars/issues"
+  },
+  "dependencies": {
+    "github-collect": "0.0.1",
+    "rss": "~0.2.1",
+    "lodash": "~2.2.1"
+  }
+}
