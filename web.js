@@ -8,8 +8,12 @@ var app = express();
 // Configure express
 app.use(express.logger());
 
+// Static assets
+app.use(express.static(__dirname + '/feeds'));
+
+// Default server
 app.get('/', function(request, response) {
-  response.send('Hello World!');
+  response.send('Feeding CARs.');
 });
 
 // Start server with port
