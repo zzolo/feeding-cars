@@ -4,9 +4,17 @@
 
 var fs = require('fs');
 var path = require('path');
+var rc = require('rc');
 var _ = require('lodash');
 var RSS = require('rss');
 var collect = require('github-collect');
+var knox = require('knox');
+
+// Get configuration
+var env = require('rc')('feeding_cars', {
+  s3_key: '',
+  s3_secret: ''
+});
 
 // Some global vars
 var feedPath = path.join(__dirname, './tmp');
@@ -23,15 +31,25 @@ catch (e) {
 }
 
 // Get accounts to collect
-var accounts = ['minnpost', 'nytimes', 'propublica', 'datadesk', 'texastribune', 'guardianinteractive', 'newsapps', 'nprapps'];
+var accounts = ['minnpost', 'nytimes', 'propublica', 'datadesk', 'texastribune', 'guardianinteractive', 'newsapps', 'nprapps', 'wnyc'];
+
+// S3 client
+var s3Client = knox.createClient({
+  key: env.s3_key,
+  secret: env.s3_secret,
+  bucket: 'data.minnpost'
+});
+var s3Path = 'feeds';
 
 // Get data from github
 collect.get(accounts).done(function(data) {
+  var created;
+
   // Set up for global feed
   var reposFile = 'repos.rss';
   var reposFilePath = path.join(feedPath, reposFile);
   var reposFeed = new RSS({
-    title: 'Repos for all acounts',
+    title: 'Feeding CARs',
     description: 'An RSS feed for Github code repositories for all acounts.',
     generator: 'feeding-cars',
     feed_url: 'feeds/' + reposFile,
@@ -82,4 +100,15 @@ collect.get(accounts).done(function(data) {
 
   // Write out global feed
   fs.writeFileSync(reposFilePath, reposFeed.xml(true));
+
+  // Export to S3
+  created = fs.readdirSync(feedPath);
+  _.each(created, function(file, fi) {
+    var localPath = path.join(feedPath, file);
+    s3Client.putFile(localPath, s3Path + '/' + file, {
+      'x-amz-acl': 'public-read'
+    }, function(error, result) {
+      // do something here
+    });
+  });
 });
