@@ -23,7 +23,7 @@ catch (e) {
 }
 
 // Get accounts to collect
-var accounts = ['minnpost', 'nytimes', 'propublica'];
+var accounts = ['minnpost', 'nytimes', 'propublica', 'datadesk', 'texastribune', 'guardianinteractive', 'newsapps', 'nprapps'];
 
 // Get data from github
 collect.get(accounts).done(function(data) {
