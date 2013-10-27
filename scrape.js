@@ -23,21 +23,35 @@ catch (e) {
 }
 
 // Get accounts to collect
-var accounts = ['minnpost'];
+var accounts = ['minnpost', 'nytimes', 'propublica'];
 
 // Get data from github
 collect.get(accounts).done(function(data) {
+  // Set up for global feed
+  var reposFile = 'repos.rss';
+  var reposFilePath = path.join(feedPath, reposFile);
+  var reposFeed = new RSS({
+    title: 'Repos for all acounts',
+    description: 'An RSS feed for Github code repositories for all acounts.',
+    generator: 'feeding-cars',
+    feed_url: 'feeds/' + reposFile,
+    site_url: '',
+    pubDate: new Date(),
+    ttl: refreshRate
+  });
+  var reposItems = [];
+
+  // Go through each account and make individual feed
   _.each(data, function(account, ai) {
-    var xmlFeed;
-    var file = account.login + '.repos.rss';
-    var filePath = path.join(feedPath, file);
+    var repoFile = 'repos.' + account.login + '.rss';
+    var repoFilePath = path.join(feedPath, repoFile);
 
     // Create RSS object
-    var feed = new RSS({
+    var repoFeed = new RSS({
       title: 'Repos for account: ' + account.login,
       description: 'An RSS feed for Github code repositories for a specific account.',
       generator: 'feeding-cars',
-      feed_url: 'feeds/' + file,
+      feed_url: 'feeds/' + repoFile,
       site_url: account.html_url,
       pubDate: new Date(),
       ttl: refreshRate
@@ -45,17 +59,27 @@ collect.get(accounts).done(function(data) {
 
     // Add items to feed
     _.each(_.sortBy(account.objects.repos, 'created_at').reverse(), function(repo, ri) {
-      feed.item({
+      var item = {
         title: repo.name,
         description: repo.description,
         url: (repo.homepage) ? repo.homepage : repo.html_url,
         guid: repo.id,
         author: repo.owner.login,
         date: repo.created_at
-      });
+      };
+      repoFeed.item(item);
+      reposItems.push(item);
     });
 
-    var xmlFeed = feed.xml(true);
-    fs.writeFileSync(filePath, xmlFeed);
+    // Write out file
+    fs.writeFileSync(repoFilePath, repoFeed.xml(true));
   });
+
+  // Sort all items by date and add to global feed
+  _.each(_.sortBy(reposItems, 'date').reverse(), function(item, ii) {
+    reposFeed.item(item);
+  });
+
+  // Write out global feed
+  fs.writeFileSync(reposFilePath, reposFeed.xml(true));
 });
