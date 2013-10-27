@@ -9,7 +9,7 @@ var app = express();
 app.use(express.logger());
 
 // Static assets
-app.use(express.static(__dirname + '/feeds'));
+app.use(express.static(__dirname + '/tmp'));
 
 // Default server
 app.get('/', function(request, response) {

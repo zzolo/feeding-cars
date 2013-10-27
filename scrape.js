@@ -9,7 +9,7 @@ var RSS = require('rss');
 var collect = require('github-collect');
 
 // Some global vars
-var feedPath = path.join(__dirname, './feeds');
+var feedPath = path.join(__dirname, './tmp');
 var refreshRate = 60;
 
 // Make directory for feeds
